@@ -1,107 +1,259 @@
-# MCP Tools Web Demo
+# MCP Tools Web Demo with AWS Terraform
 
-This is a web-based interface for testing Model Context Protocol (MCP) tools with a modern, interactive UI.
+A comprehensive web interface for testing Model Context Protocol (MCP) tools, including math operations, time functions, weather API, and AWS Terraform infrastructure management.
 
-## Features
+## 🚀 Features
 
-- 🔧 **Interactive Tool Testing**: Select and test MCP tools through a web interface
-- 📋 **Tool Discovery**: Automatically loads and displays all available MCP tools
-- 🎯 **Parameter Input**: Dynamic form generation based on tool schemas
-- 🚀 **Quick Test Examples**: Pre-configured buttons for common test scenarios
-- 📊 **Real-time Results**: See tool execution results and errors immediately
-- 🎨 **Modern UI**: Beautiful, responsive interface built with Tailwind CSS
+- **Interactive Web Interface**: Clean, responsive UI built with TailwindCSS and Alpine.js
+- **Multiple Tool Categories**:
+  - 🧮 **Math Operations**: Addition, subtraction, multiplication, division
+  - ⏰ **Time Functions**: Current time and date operations
+  - 🌤️ **Weather API**: Location-based weather information
+  - 🏗️ **AWS Terraform**: Infrastructure management and documentation search
+- **Real-time Tool Execution**: Execute MCP tools directly from the browser
+- **Tool Discovery**: Automatic categorization and filtering of available tools
+- **Quick Test Examples**: Pre-configured test cases for common operations
 
-## Quick Start
+## 📋 Prerequisites
 
-1. **Install Dependencies**:
-   ```bash
-   pip install fastapi uvicorn
-   ```
-
-2. **Run the Web Demo**:
-   ```bash
-   python demo_mcp_tools.py
-   ```
-
-3. **Open Your Browser**:
-   Navigate to `http://localhost:8000`
-
-## How to Use
-
-### Available Tools
-The demo automatically loads the following MCP tools:
-- **Math Tools**: `add`, `multiply` - Basic arithmetic operations
-- **Time Tool**: `get_time` - Get current time
-- **Weather Tool**: `get_weather` - Get weather information for a location
-
-### Testing Tools
-
-1. **Select a Tool**: Click on any tool card in the "Available Tools" section
-2. **Enter Parameters**: Fill in the required parameters (if any)
-3. **Execute**: Click the "Execute Tool" button
-4. **View Results**: Results or errors will be displayed below
-
-### Quick Test Examples
-
-Use the pre-configured quick test buttons for common scenarios:
-- **Math: Add** - Adds 5 + 3
-- **Math: Multiply** - Multiplies 4 × 6
-- **Get Time** - Shows current time
-- **Weather** - Gets weather for San Francisco
-
-## API Endpoints
-
-The web demo exposes the following API endpoints:
-
-- `GET /` - Main web interface
-- `GET /api/tools` - List all available tools (JSON)
-- `POST /api/execute` - Execute a tool with parameters
-
-### Example API Usage
-
+### Required Dependencies
 ```bash
-# Get available tools
-curl http://localhost:8000/api/tools
+pip install fastapi uvicorn langchain-mcp-adapters
+```
 
-# Execute a tool
+### Optional Dependencies
+- **uvx**: For AWS Terraform MCP server integration
+- **Python 3.8+**: Required for running the application
+
+## 🛠️ Installation
+
+1. **Clone or download the application**:
+   ```bash
+   # Save the script as mcp_web_demo.py
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   pip install fastapi uvicorn langchain-mcp-adapters
+   ```
+
+3. **Set up test servers** (optional):
+   Create a `tests/servers/` directory with the following test servers:
+   - `math_server.py`: Math operations
+   - `time_server.py`: Time functions
+   - `weather_server.py`: Weather API
+
+4. **Install AWS Terraform MCP server** (optional):
+   ```bash
+   # Install uvx if not already installed
+   pip install uvx
+   ```
+
+## 🚀 Usage
+
+### Starting the Server
+```bash
+python mcp_web_demo.py
+```
+
+The web interface will be available at: **http://localhost:8000**
+
+### Using the Web Interface
+
+1. **Browse Available Tools**: View all available MCP tools categorized by type
+2. **Filter Tools**: Use the search box to find specific tools
+3. **Select a Tool**: Click on any tool to view its details and parameters
+4. **Set Parameters**: Fill in required parameters for the selected tool
+5. **Execute**: Click "Execute Tool" to run the tool and view results
+6. **Quick Tests**: Use pre-configured examples for common operations
+
+### Tool Categories
+
+| Category | Description | Example Tools |
+|----------|-------------|---------------|
+| 🧮 **Math** | Basic arithmetic operations | `add`, `subtract`, `multiply`, `divide` |
+| ⏰ **Time** | Date and time functions | `get_time`, `get_date` |
+| 🌤️ **Weather** | Weather information | `get_weather` |
+| 🏗️ **Terraform/AWS** | Infrastructure management | `SearchAwsProviderDocs`, `checkov` |
+
+## 🔧 Configuration
+
+### Server Configuration
+The application is configured to connect to multiple MCP servers:
+
+```python
+server_configs = {
+    "math": {
+        "command": sys.executable,
+        "args": [math_server_path],
+        "transport": "stdio",
+    },
+    "time": {
+        "command": sys.executable,
+        "args": [time_server_path],
+        "transport": "stdio",
+    },
+    "weather": {
+        "command": sys.executable,
+        "args": [weather_server_path],
+        "transport": "stdio",
+    },
+    "terraform": {
+        "command": "uvx",
+        "args": ["awslabs.terraform-mcp-server@latest"],
+        "transport": "stdio",
+        "env": {
+            "FASTMCP_LOG_LEVEL": "ERROR"
+        }
+    }
+}
+```
+
+### Environment Variables
+- `FASTMCP_LOG_LEVEL`: Controls logging level for the FastMCP server (default: ERROR)
+
+## 📡 API Endpoints
+
+### GET `/`
+Returns the main web interface HTML page.
+
+### GET `/api/tools`
+Returns a JSON array of available MCP tools.
+
+**Response Format**:
+```json
+[
+  {
+    "name": "tool_name",
+    "description": "Tool description",
+    "args_schema": {
+      "properties": {
+        "param1": {"type": "string"},
+        "param2": {"type": "number"}
+      }
+    }
+  }
+]
+```
+
+### POST `/api/execute`
+Executes a specified MCP tool with given parameters.
+
+**Request Format**:
+```json
+{
+  "tool_name": "add",
+  "parameters": {
+    "a": "5",
+    "b": "3"
+  }
+}
+```
+
+**Response Format**:
+```json
+{
+  "result": "8"
+}
+```
+
+## 🧪 Testing Examples
+
+### Math Operations
+```bash
+# Addition
 curl -X POST http://localhost:8000/api/execute \
   -H "Content-Type: application/json" \
-  -d '{
-    "tool_name": "add",
-    "parameters": {"a": "5", "b": "3"}
-  }'
+  -d '{"tool_name": "add", "parameters": {"a": "5", "b": "3"}}'
+
+# Multiplication
+curl -X POST http://localhost:8000/api/execute \
+  -H "Content-Type: application/json" \
+  -d '{"tool_name": "multiply", "parameters": {"a": "4", "b": "6"}}'
 ```
 
-## Architecture
-
-- **Backend**: FastAPI web server
-- **Frontend**: HTML with Alpine.js for reactivity
-- **Styling**: Tailwind CSS for modern UI
-- **MCP Integration**: Uses langchain-mcp-adapters for tool management
-
-## Stopping the Server
-
-Press `Ctrl+C` in the terminal to stop the web server.
-
-## Troubleshooting
-
-### Missing Dependencies
-If you see an error about missing dependencies, install them:
+### Time Functions
 ```bash
-pip install fastapi uvicorn
+# Get current time
+curl -X POST http://localhost:8000/api/execute \
+  -H "Content-Type: application/json" \
+  -d '{"tool_name": "get_time", "parameters": {}}'
 ```
 
-### Port Already in Use
-If port 8000 is already in use, you can modify the port in the script:
+### Weather API
+```bash
+# Get weather for San Francisco
+curl -X POST http://localhost:8000/api/execute \
+  -H "Content-Type: application/json" \
+  -d '{"tool_name": "get_weather", "parameters": {"location": "San Francisco"}}'
+```
+
+### AWS Terraform
+```bash
+# Search AWS provider documentation
+curl -X POST http://localhost:8000/api/execute \
+  -H "Content-Type: application/json" \
+  -d '{"tool_name": "SearchAwsProviderDocs", "parameters": {"asset_name": "aws_ec2_instance"}}'
+```
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **Missing Dependencies**:
+   ```bash
+   pip install fastapi uvicorn langchain-mcp-adapters
+   ```
+
+2. **AWS Terraform Server Not Available**:
+   - Install uvx: `pip install uvx`
+   - Ensure internet connection for downloading the server
+
+3. **Test Servers Missing**:
+   - The application will work without test servers
+   - Only AWS Terraform tools will be available
+
+4. **Port Already in Use**:
+   - Change the port in the `uvicorn.run()` call
+   - Or kill the process using port 8000
+
+### Debug Mode
+To enable debug logging, modify the server configuration:
 ```python
-uvicorn.run(app, host="0.0.0.0", port=8001, log_level="info")  # Use port 8001
+"env": {
+    "FASTMCP_LOG_LEVEL": "DEBUG"
+}
 ```
 
-### Tool Loading Issues
-If tools fail to load, ensure the test servers are working:
-```bash
-# Test individual servers
-python tests/servers/math_server.py
-python tests/servers/time_server.py
-python tests/servers/weather_server.py
-``` 
+## 🔒 Security Considerations
+
+- The application runs on `0.0.0.0:8000` by default (accessible from any network interface)
+- For production use, consider:
+  - Restricting host to `127.0.0.1` for localhost only
+  - Adding authentication and authorization
+  - Using HTTPS with proper SSL certificates
+  - Implementing rate limiting
+
+## 📄 License
+
+This project is provided as-is for educational and testing purposes. Please ensure you comply with the licenses of all dependencies and MCP servers used.
+
+## 🤝 Contributing
+
+Contributions are welcome! Areas for improvement:
+- Additional MCP server integrations
+- Enhanced error handling
+- Better UI/UX design
+- Documentation improvements
+- Test coverage
+
+## 📞 Support
+
+For issues related to:
+- **FastAPI**: Check the [FastAPI documentation](https://fastapi.tiangolo.com/)
+- **MCP Protocol**: Refer to the [MCP specification](https://modelcontextprotocol.io/)
+- **AWS Terraform MCP**: Check the [AWS Labs repository](https://github.com/awslabs/terraform-mcp-server)
+
+---
+
+**Happy Testing!** �
